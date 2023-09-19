@@ -1,7 +1,7 @@
 package com.soapwebservice.spring.soap.api.config;
 
 
-import java.util.Collections;
+
 import java.util.List;
 
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -9,11 +9,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.ws.server.EndpointInterceptor;
-import org.springframework.ws.client.support.interceptor.PayloadValidatingInterceptor;
 import org.springframework.ws.config.annotation.EnableWs;
 import org.springframework.ws.config.annotation.WsConfigurerAdapter;
-import org.springframework.ws.server.endpoint.interceptor.PayloadLoggingInterceptor;
+import org.springframework.ws.server.EndpointInterceptor;
+import org.springframework.ws.soap.security.wss4j2.Wss4jSecurityInterceptor;
 import org.springframework.ws.transport.http.MessageDispatcherServlet;
 import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
@@ -48,37 +47,19 @@ public class SoapWSConfig extends WsConfigurerAdapter {
 	}
 	
 	@Bean
-	public XwsSecurityInterceptor securityInterceptor() {
-		XwsSecurityInterceptor securityInterceptor = new XwsSecurityInterceptor();
-		securityInterceptor.setCallbackHandler(callbackHandler());
-		securityInterceptor.setPolicyConfiguration(new ClassPathResource("securityPolicy.xml"));
+	public Wss4jSecurityInterceptor securityInterceptor() {
+		Wss4jSecurityInterceptor securityInterceptor = new Wss4jSecurityInterceptor();
+		securityInterceptor.setSecurementActions("UsernameToken");
+		securityInterceptor.setSecurementUsername("admin1");
+		securityInterceptor.setSecurementPassword("DharsiniKR@73");
+
 		return securityInterceptor;
 	}
-
-	@Bean
-	public SimplePasswordValidationCallbackHandler callbackHandler() {
-		SimplePasswordValidationCallbackHandler callbackHandler = new SimplePasswordValidationCallbackHandler();
-		callbackHandler.setUsersMap(Collections.singletonMap("admin", "pwd123"));
-		return callbackHandler;
-	}
-
+	
 	@Override
 	public void addInterceptors(List<EndpointInterceptor> interceptors) {
-		interceptors.add(payloadLoggingInterceptor());
-		interceptors.add(payloadValidatingInterceptor());
 		interceptors.add(securityInterceptor());
 	}
-
-	@Bean
-	public PayloadLoggingInterceptor payloadLoggingInterceptor() {
-		return new PayloadLoggingInterceptor();
-	}
-
-	@Bean
-	public PayloadValidatingInterceptor payloadValidatingInterceptor() {
-		final PayloadValidatingInterceptor payloadValidatingInterceptor = new PayloadValidatingInterceptor();
-		payloadValidatingInterceptor.setSchema(new ClassPathResource("customer-service.xsd"));
-		return payloadValidatingInterceptor;
-	}
-
+	
+	
 }
